@@ -59,7 +59,7 @@ USER $USERNAME
 RUN npm config set prefix "/home/${USERNAME}/.npm-global"
 
 # Install Claude Code via native installer
-RUN curl -fsSL https://claude.ai/install.sh | sh
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Install Beads in user's npm directory
 RUN npm install -g @beads/bd
