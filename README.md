@@ -12,9 +12,29 @@ Shared development container image for Python projects with Claude Code, Node.js
 - Common Python tools: poetry, pipx, black, ruff, mypy, pytest, httpx, pydantic
 - Development utilities: git, gh, ripgrep, fd, jq, tmux, vim
 
-## Usage
+## First-Time Host Setup
 
-In your project's `.devcontainer/devcontainer.json`:
+Before using this devcontainer, create the shared config directories on your host machine. This only needs to be done once per machine.
+
+```bash
+# Create shared config directory
+mkdir -p ~/.config/claude-shared
+
+# Initialize the Claude config file (IMPORTANT: must be a file, not directory)
+echo '{}' > ~/.config/claude-shared/.claude.json
+
+# Create directories for beads and journal
+mkdir -p ~/.config/claude-shared/.beads
+mkdir -p ~/.config/claude-shared/.private-journal
+
+# Create secrets directory
+mkdir -p ~/.secrets
+touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
+```
+
+## Using in a New Project
+
+1. Create `.devcontainer/devcontainer.json` in your project:
 
 ```json
 {
@@ -52,13 +72,16 @@ In your project's `.devcontainer/devcontainer.json`:
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
       },
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
-        "Anthropic.claude-code"
+        "Anthropic.claude-code",
+        "eamodio.gitlens"
       ]
     }
   },
@@ -72,14 +95,96 @@ In your project's `.devcontainer/devcontainer.json`:
 }
 ```
 
-## Updating the Image
+2. Open the project in VS Code and select "Reopen in Container"
 
-Push changes to `main` branch - GitHub Actions will automatically build and push a new image.
+## How It Works
 
-To manually trigger a build, use the "Run workflow" button in the Actions tab.
+### Shared vs Project-Specific Data
 
-## Pulling Updates
+| Data | Storage | Shared Across Projects? |
+|------|---------|------------------------|
+| Claude Code settings, hooks, plugins | `~/.claude/` (Docker volume) | Yes |
+| MCP servers, OAuth | `~/.claude.json` (bind mount) | Yes |
+| Beads tasks | `~/.beads/` (bind mount) | Yes |
+| Private journal | `~/.private-journal/` (bind mount) | Yes |
+| AWS credentials | `~/.aws/` (Docker volume) | Yes |
+| Session history | `~/.claude/projects/` | Per project path |
+| pip cache | `~/.cache/pip/` (Docker volume) | Yes |
 
-In your project, rebuild the devcontainer to pull the latest image:
-- VS Code: `Dev Containers: Rebuild Container`
-- CLI: `devcontainer up --remove-existing-container`
+### Why Bind Mounts vs Docker Volumes?
+
+- **Bind mounts** (`${localEnv:HOME}/...`): Data stored on your host, survives container deletion, easily backed up
+- **Docker volumes** (`source=volume-name`): Data managed by Docker, faster I/O, persists across rebuilds
+
+## Updating the Base Image
+
+When you need to add tools or change the base configuration:
+
+1. Clone this repo:
+   ```bash
+   git clone https://github.com/inconceivablelabs/devcontainer-python.git
+   cd devcontainer-python
+   ```
+
+2. Edit the `Dockerfile`
+
+3. Commit and push to `main`:
+   ```bash
+   git add Dockerfile
+   git commit -m "Add new tool X"
+   git push
+   ```
+
+4. GitHub Actions automatically builds and pushes to `ghcr.io/inconceivablelabs/devcontainer-python:latest`
+
+5. In your projects, rebuild containers to get the update:
+   - VS Code: `Ctrl+Shift+P` → "Dev Containers: Rebuild Container"
+   - CLI: `devcontainer up --remove-existing-container`
+
+### Manual Build Trigger
+
+To rebuild without changing the Dockerfile, go to [Actions](https://github.com/inconceivablelabs/devcontainer-python/actions) and click "Run workflow".
+
+## Pulling Updates in Projects
+
+When the base image is updated, your existing containers won't automatically update. To get the latest:
+
+**VS Code:**
+1. `Ctrl+Shift+P` → "Dev Containers: Rebuild Container"
+
+**CLI:**
+```bash
+docker pull ghcr.io/inconceivablelabs/devcontainer-python:latest
+devcontainer up --remove-existing-container
+```
+
+## Troubleshooting
+
+### "No such file" errors on container start
+
+The bind mounts require files/directories to exist on your host before starting the container. Run the First-Time Host Setup commands above.
+
+### MCP servers not showing up
+
+MCP servers are stored in `~/.claude.json` under project-specific keys. To make them available globally, move them to the root `mcpServers` key:
+
+```json
+{
+  "mcpServers": {
+    "your-server": { ... }
+  }
+}
+```
+
+### Claude Code shows npm deprecation warning
+
+The image uses the native Claude installer. If you see npm warnings, you may have an old cached image. Run:
+```bash
+docker pull ghcr.io/inconceivablelabs/devcontainer-python:latest
+```
+Then rebuild your container.
+
+## Projects Using This Image
+
+- [health_condition_poc](https://github.com/inconceivablelabs/health_condition_poc)
+- [personal-assistant](https://github.com/inconceivablelabs/personal-assistant)
