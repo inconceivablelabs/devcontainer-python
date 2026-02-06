@@ -77,6 +77,12 @@ RUN pip install --no-cache-dir \
     httpx \
     python-dotenv \
     pydantic
+
+# Install data analysis libraries
+RUN pip install --no-cache-dir \
+    pandas \
+    numpy \
+    matplotlib
     
 # Set up paths for Claude native install, pipx, and npm-global
 ENV PATH="/home/${USERNAME}/.claude/bin:/home/${USERNAME}/.npm-global/bin:/home/${USERNAME}/.local/bin:${PATH}"
