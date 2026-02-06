@@ -40,6 +40,7 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
 {
   "name": "Python Dev",
   "image": "ghcr.io/inconceivablelabs/devcontainer-python:latest",
+  "runArgs": ["--name", "claude-remote", "--hostname", "claude-remote"],
 
   "mounts": [
     "source=${localEnv:HOME}/.secrets/.env,target=/home/vscode/.env,type=bind,readonly",
@@ -50,7 +51,8 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
     "source=python-dev-bashhistory,target=/home/vscode/.bash_history,type=volume",
     "source=${localEnv:HOME}/.config/claude-shared/.claude.json,target=/home/vscode/.claude.json,type=bind",
     "source=${localEnv:HOME}/.config/claude-shared/.beads,target=/home/vscode/.beads,type=bind",
-    "source=${localEnv:HOME}/.config/claude-shared/.private-journal,target=/home/vscode/.private-journal,type=bind"
+    "source=${localEnv:HOME}/.config/claude-shared/.private-journal,target=/home/vscode/.private-journal,type=bind",
+    "source=/mnt/c/Users/tboot/Downloads,target=/home/vscode/cdrive,type=bind"
   ],
 
   "forwardPorts": [8000, 8080, 5000, 3000],
