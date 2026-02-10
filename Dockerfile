@@ -76,12 +76,10 @@ RUN pip install --no-cache-dir \
     ipython \
     httpx \
     python-dotenv \
-    pydantic
-
-# Install data analysis libraries
-RUN pip install --no-cache-dir \
+    pydantic \
     pandas \
     numpy \
+    scipy \
     matplotlib
     
 # Set up paths for Claude native install, pipx, and npm-global
