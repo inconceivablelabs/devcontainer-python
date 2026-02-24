@@ -9,6 +9,7 @@ Shared development container image for Python projects with Claude Code, Node.js
 - Claude Code (native installer)
 - Beads task tracking (`bd`)
 - AWS CLI v2
+- rbw (unofficial Bitwarden CLI) for secrets management
 - Common Python tools: poetry, pipx, black, ruff, mypy, pytest, httpx, pydantic
 - Development utilities: git, gh, ripgrep, fd, jq, tmux, vim
 
@@ -52,7 +53,8 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
     "source=${localEnv:HOME}/.config/claude-shared/.claude.json,target=/home/vscode/.claude.json,type=bind",
     "source=${localEnv:HOME}/.config/claude-shared/.beads,target=/home/vscode/.beads,type=bind",
     "source=${localEnv:HOME}/.config/claude-shared/.private-journal,target=/home/vscode/.private-journal,type=bind",
-    "source=/mnt/c/Users/tboot/Downloads,target=/home/vscode/cdrive,type=bind"
+    "source=/mnt/c/Users/tboot/Downloads,target=/home/vscode/cdrive,type=bind",
+    "source=python-dev-rbw-config,target=/home/vscode/.config/rbw,type=volume"
   ],
 
   "forwardPorts": [8000, 8080, 5000, 3000],
@@ -110,6 +112,7 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
 | Beads tasks | `~/.beads/` (bind mount) | Yes |
 | Private journal | `~/.private-journal/` (bind mount) | Yes |
 | AWS credentials | `~/.aws/` (Docker volume) | Yes |
+| rbw config & vault cache | `~/.config/rbw/` (Docker volume) | Yes |
 | Session history | `~/.claude/projects/` | Per project path |
 | pip cache | `~/.cache/pip/` (Docker volume) | Yes |
 
