@@ -47,6 +47,12 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && ./aws/install \
     && rm -rf aws awscliv2.zip
 
+# Install rbw (unofficial Bitwarden CLI) for secrets management
+ARG RBW_VERSION=1.15.0
+RUN curl -fsSL "https://github.com/doy/rbw/releases/download/${RBW_VERSION}/rbw_${RBW_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz -C /usr/local/bin/ rbw rbw-agent \
+    && chmod +x /usr/local/bin/rbw /usr/local/bin/rbw-agent
+
 # Configure npm to use user directory for global packages (allows auto-updates)
 # This must be done BEFORE switching to non-root user
 RUN mkdir -p /home/${USERNAME}/.npm-global \
