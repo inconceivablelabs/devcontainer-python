@@ -1,0 +1,43 @@
+{
+  "name": "python-dev",
+  "image": "ghcr.io/inconceivablelabs/devcontainer-python:latest",
+
+  "mounts": [
+    "source=dolt-data,target=/home/vscode/.dolt-server,type=volume"
+  ],
+
+  "postCreateCommand": {
+    "beads-claude": "bd setup claude || true",
+    "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true"
+  },
+
+  "postStartCommand": {
+    "start-dolt": ".devcontainer/start-dolt.sh"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+          }
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "Anthropic.claude-code"
+      ]
+    }
+  },
+
+  "remoteUser": "vscode"
+}
