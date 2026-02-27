@@ -23,6 +23,10 @@ fi
 # --- Initialize server root (idempotent) ---
 
 if [ ! -d "$DOLT_ROOT/.dolt" ]; then
+    # Docker volumes are created as root; ensure vscode user owns the directory
+    if [ -d "$DOLT_ROOT" ] && [ ! -w "$DOLT_ROOT" ]; then
+        sudo chown -R "$(id -u):$(id -g)" "$DOLT_ROOT"
+    fi
     mkdir -p "$DOLT_ROOT"
 
     # Configure Dolt identity from git config (or defaults)
