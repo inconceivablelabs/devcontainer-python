@@ -7,7 +7,8 @@ Shared development container image for Python projects with Claude Code, Node.js
 - Python 3.12 (Debian Bookworm)
 - Node.js 20.x LTS
 - Claude Code (native installer)
-- Beads task tracking (`bd`)
+- Beads task tracking (`bd`) with Dolt backend
+- Dolt v1.82.6 (version-controlled SQL database)
 - AWS CLI v2
 - rbw (unofficial Bitwarden CLI) for secrets management
 - Common Python tools: poetry, pipx, black, ruff, mypy, pytest, httpx, pydantic
@@ -35,71 +36,13 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
 
 ## Using in a New Project
 
-1. Create `.devcontainer/devcontainer.json` in your project:
+1. Copy the `.devcontainer/` directory from this repo into your project. It includes a reference `devcontainer.json` and `start-dolt.sh` for the Dolt server.
 
-```json
-{
-  "name": "Python Dev",
-  "image": "ghcr.io/inconceivablelabs/devcontainer-python:latest",
-  "runArgs": ["--name", "claude-remote", "--hostname", "claude-remote"],
+2. Customize `devcontainer.json` for your project (add mounts, env vars, extensions, etc.)
 
-  "mounts": [
-    "source=${localEnv:HOME}/.secrets/.env,target=/home/vscode/.env,type=bind,readonly",
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
-    "source=python-pip-cache,target=/home/vscode/.cache/pip,type=volume",
-    "source=python-dev-aws-config,target=/home/vscode/.aws,type=volume",
-    "source=python-dev-claude-config,target=/home/vscode/.claude,type=volume",
-    "source=python-dev-bashhistory,target=/home/vscode/.bash_history,type=volume",
-    "source=${localEnv:HOME}/.config/claude-shared/.claude.json,target=/home/vscode/.claude.json,type=bind",
-    "source=${localEnv:HOME}/.config/claude-shared/.beads,target=/home/vscode/.beads,type=bind",
-    "source=${localEnv:HOME}/.config/claude-shared/.private-journal,target=/home/vscode/.private-journal,type=bind",
-    "source=/mnt/c/Users/tboot/Downloads,target=/home/vscode/cdrive,type=bind",
-    "source=python-dev-rbw-config,target=/home/vscode/.config/rbw,type=volume"
-  ],
+3. Open the project in VS Code and select "Reopen in Container"
 
-  "forwardPorts": [8000, 8080, 5000, 3000],
-
-  "containerEnv": {
-    "DOTENV_PATH": "/home/vscode/.env",
-    "PYTHONDONTWRITEBYTECODE": "1",
-    "PYTHONUNBUFFERED": "1"
-  },
-
-  "postCreateCommand": {
-    "load-env": "echo 'source /home/vscode/.env 2>/dev/null || true' >> ~/.bashrc",
-    "git-config": "git config --global --add safe.directory /workspaces",
-    "gh-git-auth": "gh auth setup-git || true",
-    "beads-claude": "bd setup claude || true",
-    "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true"
-  },
-
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "charliermarsh.ruff"
-      },
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "charliermarsh.ruff",
-        "Anthropic.claude-code",
-        "eamodio.gitlens"
-      ]
-    }
-  },
-
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  },
-
-  "remoteUser": "vscode"
-}
-```
-
-2. Open the project in VS Code and select "Reopen in Container"
+The reference config in `.devcontainer/devcontainer.json` includes the minimal setup: the base image, Dolt volume mount, and startup hooks. See the claude-remote workspace for a full example with secrets, SSH keys, and additional volumes.
 
 ## How It Works
 
@@ -109,7 +52,8 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
 |------|---------|------------------------|
 | Claude Code settings, hooks, plugins | `~/.claude/` (Docker volume) | Yes |
 | MCP servers, OAuth | `~/.claude.json` (bind mount) | Yes |
-| Beads tasks | `~/.beads/` (bind mount) | Yes |
+| Beads tasks (Dolt databases) | `~/.dolt-server/` (Docker volume `dolt-data`) | Yes |
+| Beads metadata & JSONL | Project `.beads/` directory | Per project |
 | Private journal | `~/.private-journal/` (bind mount) | Yes |
 | AWS credentials | `~/.aws/` (Docker volume) | Yes |
 | rbw config & vault cache | `~/.config/rbw/` (Docker volume) | Yes |
@@ -162,6 +106,31 @@ When the base image is updated, your existing containers won't automatically upd
 docker pull ghcr.io/inconceivablelabs/devcontainer-python:latest
 devcontainer up --remove-existing-container
 ```
+
+## Dolt Server (Beads Backend)
+
+Beads v0.56+ uses Dolt as its storage backend. A shared Dolt SQL server starts automatically on container startup via `postStartCommand`.
+
+**How it works:**
+- Server root: `/home/vscode/.dolt-server/` (persisted in `dolt-data` Docker volume)
+- Port: 3307 (localhost)
+- Startup script: `.devcontainer/start-dolt.sh` (idempotent, safe to re-run)
+
+**For new projects using Beads:**
+```bash
+cd your-project
+bd init --prefix your-project
+```
+
+This creates a `beads_your-project` database on the shared server automatically.
+
+**Manual restart:**
+```bash
+kill $(cat /home/vscode/.dolt-server/sql-server.pid)
+.devcontainer/start-dolt.sh
+```
+
+**Logs:** `/home/vscode/.dolt-server/sql-server.log`
 
 ## Troubleshooting
 
