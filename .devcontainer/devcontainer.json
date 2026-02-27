@@ -1,12 +1,34 @@
 {
   "name": "python-dev",
   "image": "ghcr.io/inconceivablelabs/devcontainer-python:latest",
+  "runArgs": ["--name", "<NAME HERE>", "--hostname", "<NAME HERE>"],
 
   "mounts": [
+    "source=${localEnv:HOME}/.secrets/.env,target=/home/vscode/.env,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
+    "source=python-pip-cache,target=/home/vscode/.cache/pip,type=volume",
+    "source=python-dev-aws-config,target=/home/vscode/.aws,type=volume",
+    "source=python-dev-claude-config,target=/home/vscode/.claude,type=volume",
+    "source=python-dev-bashhistory,target=/home/vscode/.bash_history,type=volume",
+    "source=${localEnv:HOME}/.config/claude-shared/.claude.json,target=/home/vscode/.claude.json,type=bind",
+    "source=${localEnv:HOME}/.config/claude-shared/.beads,target=/home/vscode/.beads,type=bind",
+    "source=${localEnv:HOME}/.config/claude-shared/.private-journal,target=/home/vscode/.private-journal,type=bind",
+    "source=/mnt/c/Users/tboot/Downloads,target=/home/vscode/cdrive,type=bind",
+    "source=python-dev-gh-config,target=/home/vscode/.config/gh,type=volume",
+    "source=python-dev-rbw-config,target=/home/vscode/.config/rbw,type=volume",
     "source=dolt-data,target=/home/vscode/.dolt-server,type=volume"
   ],
 
+    "containerEnv": {
+    "DOTENV_PATH": "/home/vscode/.env",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUNBUFFERED": "1"
+  },
+
   "postCreateCommand": {
+    "load-env": "echo 'source /home/vscode/.env 2>/dev/null || true' >> ~/.bashrc",
+    "git-config": "git config --global --add safe.directory /workspaces",
+    "gh-git-auth": "gh auth setup-git || true",
     "beads-claude": "bd setup claude || true",
     "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true"
   },
@@ -28,14 +50,45 @@
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
           }
-        }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "git.autofetch": true
       },
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
-        "Anthropic.claude-code"
+        "Anthropic.claude-code",
+        "eamodio.gitlens",
+        "amazonwebservices.aws-toolkit-vscode",
+        "mhutchie.git-graph",
+        "esbenp.prettier-vscode",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens",
+        "gruntfuggly.todo-tree",
+        "tomoki1207.pdf",
+        
+        // Docker (for managing other containers)
+        "ms-azuretools.vscode-docker",
+        "ms-azuretools.vscode-containers",
+        "docker.docker",
+
+        // API development
+        "humao.rest-client",
+        "MeshIntelligentTechnologiesInc.pieces-vscode",
+        "ms-vscode.powershell",
+
+        // Remote development
+        "ms-vscode-remote.remote-containers"
       ]
+    }
+  },
+
+  "features": {
+  "ghcr.io/devcontainers/features/github-cli:1": {},
+  "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "moby": false
     }
   },
 
