@@ -53,6 +53,12 @@ RUN curl -fsSL "https://github.com/doy/rbw/releases/download/${RBW_VERSION}/rbw_
     | tar -xz -C /usr/local/bin/ rbw rbw-agent \
     && chmod +x /usr/local/bin/rbw /usr/local/bin/rbw-agent
 
+# Install Dolt (version-controlled SQL database for Beads task tracking)
+ARG DOLT_VERSION=1.82.6
+RUN curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-amd64.tar.gz" \
+    | tar -xz -C /usr/local/bin/ --strip-components=2 dolt-linux-amd64/bin/dolt \
+    && chmod +x /usr/local/bin/dolt
+
 # Configure npm to use user directory for global packages (allows auto-updates)
 # This must be done BEFORE switching to non-root user
 RUN mkdir -p /home/${USERNAME}/.npm-global \
