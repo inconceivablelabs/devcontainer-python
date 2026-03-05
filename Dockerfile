@@ -84,6 +84,8 @@ RUN pip install --no-cache-dir \
     black \
     ruff \
     mypy \
+    pyright \
+    pre-commit \
     pytest \
     pytest-asyncio \
     ipython \
@@ -101,10 +103,25 @@ ENV PATH="/home/${USERNAME}/.claude/bin:/home/${USERNAME}/.npm-global/bin:/home/
 # Create workspace directory
 WORKDIR /workspaces
 
-# Configure git to use the credential helper
+# Configure git to use the credential helper and global pre-commit hooks
 RUN git config --global credential.helper store \
     && git config --global init.defaultBranch main \
-    && git config --global core.autocrlf input
+    && git config --global core.autocrlf input \
+    && git config --global core.hooksPath /home/${USERNAME}/.git-hooks
+
+# Install global pre-commit hook (delegates to pre-commit framework if config exists)
+RUN mkdir -p /home/${USERNAME}/.git-hooks \
+    && printf '#!/bin/bash\n\
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"\n\
+if [ -f "$REPO_ROOT/.pre-commit-config.yaml" ]; then\n\
+    if command -v pre-commit &>/dev/null; then\n\
+        exec pre-commit run --hook-stage pre-commit\n\
+    else\n\
+        echo "WARNING: .pre-commit-config.yaml found but pre-commit is not installed"\n\
+        exit 1\n\
+    fi\n\
+fi\n' > /home/${USERNAME}/.git-hooks/pre-commit \
+    && chmod +x /home/${USERNAME}/.git-hooks/pre-commit
 
 # Keep container running for dev container use
 CMD ["sleep", "infinity"]
