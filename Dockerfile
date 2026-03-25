@@ -117,7 +117,7 @@ RUN npm config set prefix "/home/${USERNAME}/.npm-global"
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Install Beads in user's npm directory (pinned to prevent breaking changes)
-ARG BEADS_VERSION=0.59.0
+ARG BEADS_VERSION=0.62.0
 RUN npm install -g @beads/bd@${BEADS_VERSION}
 
 # Install common Python development tools
