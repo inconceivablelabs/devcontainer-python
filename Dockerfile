@@ -102,6 +102,15 @@ RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VE
     | tar -xz --strip-components=1 -C /usr/local/bin/ --wildcards '*/delta' \
     && chmod +x /usr/local/bin/delta
 
+# Group-writable umask so files created in shared workspaces (e.g. /knowledge
+# bind-mounted into the assistant container as a different uid) stay writable
+# across containers. Bash tool subshells from Claude Code use `zsh -c`, which
+# sources /etc/zsh/zshenv on every invocation; login shells source
+# /etc/profile.d/. See pa-ioin / pa-nmw6.
+RUN echo 'umask 002' > /etc/profile.d/umask.sh \
+    && chmod +x /etc/profile.d/umask.sh \
+    && echo 'umask 002' >> /etc/zsh/zshenv
+
 # Configure npm to use user directory for global packages (allows auto-updates)
 # This must be done BEFORE switching to non-root user
 RUN mkdir -p /home/${USERNAME}/.npm-global \
