@@ -102,6 +102,14 @@ RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VE
     | tar -xz --strip-components=1 -C /usr/local/bin/ --wildcards '*/delta' \
     && chmod +x /usr/local/bin/delta
 
+# Install rclone (cloud-storage sync, used by personal-assistant backup cron)
+ARG RCLONE_VERSION=1.74.1
+RUN curl -fsSL "https://github.com/rclone/rclone/releases/download/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-linux-amd64.zip" \
+    -o /tmp/rclone.zip \
+    && unzip -j /tmp/rclone.zip "rclone-v${RCLONE_VERSION}-linux-amd64/rclone" -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/rclone \
+    && rm /tmp/rclone.zip
+
 # Group-writable umask so files created in shared workspaces (e.g. /knowledge
 # bind-mounted into the assistant container as a different uid) stay writable
 # across containers. Bash tool subshells from Claude Code use `zsh -c`, which
