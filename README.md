@@ -5,13 +5,13 @@ Shared development container image for Python projects with Claude Code, Node.js
 ## What's Included
 
 - Python 3.12 (Debian Bookworm)
-- Node.js 20.x LTS
+- Node.js 22.x LTS
 - Claude Code (native installer)
 - Beads task tracking (`bd`) with Dolt backend
 - Dolt v1.82.6 (version-controlled SQL database)
 - AWS CLI v2
 - rbw (unofficial Bitwarden CLI) for secrets management
-- Common Python tools: poetry, pipx, black, ruff, mypy, pytest, httpx, pydantic
+- Common Python tools: poetry, pipx, ruff, pyright, pre-commit, pytest, httpx, pydantic
 - Development utilities: git, gh, ripgrep, fd, jq, tmux, vim
 
 ## First-Time Host Setup
