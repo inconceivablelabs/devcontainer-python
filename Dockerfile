@@ -10,10 +10,10 @@ ARG USER_GID=$USER_UID
 # Remove expired Yarn repo from base image
 RUN rm -f /etc/apt/sources.list.d/yarn.list || true
 
-# Install Node.js 22.x LTS
+# Install Node.js 22.x LTS (bundled npm 10.x is current; do not `npm install -g npm@latest` —
+# NodeSource's deb ships an npm with a broken self-upgrade path, see prior GHA run 26241369921).
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get update && apt-get install -y nodejs
-RUN npm install -g npm@latest
 
 # Install additional development tools
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
