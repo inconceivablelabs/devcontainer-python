@@ -10,8 +10,8 @@ ARG USER_GID=$USER_UID
 # Remove expired Yarn repo from base image
 RUN rm -f /etc/apt/sources.list.d/yarn.list || true
 
-# Install Node.js 20.x LTS
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+# Install Node.js 22.x LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 RUN npm install -g npm@latest
 
@@ -136,6 +136,10 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 # Install Beads in user's npm directory (pinned to prevent breaking changes)
 ARG BEADS_VERSION=1.0.3
 RUN npm install -g @beads/bd@${BEADS_VERSION}
+
+# Install beads-ui (local web UI for the bd CLI; run via `bdui-all` helper)
+ARG BEADS_UI_VERSION=0.12.0
+RUN npm install -g beads-ui@${BEADS_UI_VERSION}
 
 # Install common Python development tools
 RUN pip install --no-cache-dir \
