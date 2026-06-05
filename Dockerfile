@@ -142,9 +142,12 @@ ARG BEADS_UI_VERSION=0.12.0
 RUN npm install -g beads-ui@${BEADS_UI_VERSION}
 
 # Install common Python development tools
+# uv: fast package manager; also a hard RUNTIME dep for Serena's LSP backend
+# (it launches language servers via uvx) and assumed by several project CLAUDE.mds.
 RUN pip install --no-cache-dir \
     poetry \
     pipx \
+    uv \
     ruff \
     pyright \
     pre-commit \
