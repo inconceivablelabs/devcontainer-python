@@ -36,7 +36,9 @@
   },
 
   "postStartCommand": {
-    "start-dolt": ".devcontainer/start-dolt.sh"
+    "start-dolt": ".devcontainer/start-dolt.sh",
+    "sync-knowledge": "if [ -d ~/.claude/knowledge/.git ]; then git -C ~/.claude/knowledge pull --ff-only || echo 'WARN: knowledge pull failed'; else git clone https://github.com/inconceivablelabs/knowledge.git ~/.claude/knowledge || echo 'WARN: knowledge clone failed — check gh auth (inconceivablelabs)'; fi",
+    "sync-skills": "if [ -d ~/.claude/skills/.git ]; then git -C ~/.claude/skills pull --ff-only || echo 'WARN: skills pull failed'; else git clone https://github.com/inconceivablelabs/claude-personal-skills.git ~/.claude/skills || echo 'WARN: skills clone failed — check gh auth (inconceivablelabs)'; fi"
   },
 
   "customizations": {
