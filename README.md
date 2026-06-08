@@ -45,6 +45,23 @@ touch ~/.secrets/.env  # Add your secrets here (ANTHROPIC_API_KEY, etc.)
 
 The reference config in `.devcontainer/devcontainer.json` includes the minimal setup: the base image, Dolt volume mount, and startup hooks. See the claude-remote workspace for a full example with secrets, SSH keys, and additional volumes.
 
+## Extending: Shared Core vs Project-Specific (Layering Model)
+
+`devcontainer.json` has **no `extends`/`include`** — so shared config cannot propagate by copying the file, because a copied file drifts the moment a project customizes it. Instead, config is layered so each tier updates independently:
+
+| Tier | Mechanism | Updates by | Examples |
+|------|-----------|------------|----------|
+| **Shared tools** | this base image | image rebuild + repull | python, node, serena, uv, git tooling, duckdb |
+| **Shared config** | the `inconceivablelabs/devcontainer-core` Feature¹ | bumping/floating the Feature ref | shared mounts, `BEADS_*` env, volume-perms fix, serena setup, knowledge/skills + Dolt wiring |
+| **Project system tools** | a devcontainer Feature (or a thin `FROM <this image>` Dockerfile for tools with no Feature) | editing the project's `devcontainer.json` | terraform (`ghcr.io/devcontainers/features/terraform:1`) |
+| **Project language deps** | `uv.lock` / `requirements.txt` via the `install-deps` hook | editing the lockfile | the repo's own Python packages |
+
+A project's `devcontainer.json` then stays **thin and purely project-specific**: `image` + `features: { core, <project tools> }` + any project mounts/deps. Shared changes land by updating the base image or the `core` Feature — **never** by editing or re-copying the project file. Project extensions (e.g. terraform) live in a different layer, so they never conflict with shared updates.
+
+**Why this works:** the dev container CLI *merges* `mounts`, `containerEnv`, and lifecycle commands (`onCreate`/`postCreate`/`postStart`) from the base image, every Feature, and the project `devcontainer.json` — all lifecycle commands run (Feature-contributed ones first), and mounts/env are additive ([spec](https://containers.dev/implementors/spec/)). So a Feature can carry shared setup that every project inherits automatically.
+
+> ¹ The `devcontainer-core` Feature is being built (bead `dc-1y1`). Until it lands, shared config still lives in the reference `devcontainer.json` and is propagated by re-copying — the drift this Feature eliminates.
+
 ## How It Works
 
 ### Shared vs Project-Specific Data
