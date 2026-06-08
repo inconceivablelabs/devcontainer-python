@@ -165,6 +165,11 @@ RUN pip install --no-cache-dir \
 # Set up paths for Claude native install, pipx, and npm-global
 ENV PATH="/home/${USERNAME}/.claude/bin:/home/${USERNAME}/.npm-global/bin:/home/${USERNAME}/.local/bin:${PATH}"
 
+# Install Serena (LSP-based symbol retrieval/refactor MCP server for CC dev work).
+# uv (above) is its hard runtime dep — the LSP backend launches language servers via uvx.
+ARG SERENA_VERSION=1.5.3
+RUN pipx install "serena-agent==${SERENA_VERSION}"
+
 # Create workspace directory
 WORKDIR /workspaces
 
