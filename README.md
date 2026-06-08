@@ -12,6 +12,7 @@ Shared development container image for Python projects with Claude Code, Node.js
 - AWS CLI v2
 - rbw (unofficial Bitwarden CLI) for secrets management
 - Common Python tools: poetry, pipx, ruff, pyright, pre-commit, pytest, httpx, pydantic
+- Serena (LSP-based symbol retrieval/refactor MCP server, via pipx)
 - Development utilities: git, gh, ripgrep, fd, jq, tmux, vim
 
 ## First-Time Host Setup
@@ -131,6 +132,10 @@ kill $(cat /home/vscode/.dolt-server/sql-server.pid)
 ```
 
 **Logs:** `/home/vscode/.dolt-server/sql-server.log`
+
+## Serena
+
+[Serena](https://github.com/oraios/serena) is an LSP-based MCP server for symbol-level code retrieval and refactoring, baked into the base image via `pipx` (pinned `SERENA_VERSION`; `uv` is its runtime dep for launching language servers). On container create, `postCreateCommand` runs `serena init` (idempotent global config) and registers Serena as an MCP server at **local scope** pinned to the single workspace (`claude mcp add serena --scope local -- serena start-mcp-server --context ide-assistant --project "$PWD"`). The symbol index warms lazily on first use. In the multi-project claude-remote host, Serena is NOT registered globally; activate it per-codebase on demand with `.devcontainer/new-serena-project.sh <path> [--index]`.
 
 ## Troubleshooting
 
