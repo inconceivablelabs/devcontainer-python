@@ -36,7 +36,8 @@
     "git-config": "git config --global --add safe.directory /workspaces",
     "gh-git-auth": "gh auth setup-git || true",
     "beads-claude": "bd setup claude || true",
-    "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true"
+    "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true",
+    "serena-setup": "serena init && claude mcp remove serena --scope local 2>/dev/null; claude mcp add serena --scope local -- serena start-mcp-server --context ide-assistant --project \"$PWD\" || echo 'WARN: serena setup failed'"
   },
 
   "postStartCommand": {
