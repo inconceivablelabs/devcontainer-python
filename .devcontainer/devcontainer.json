@@ -42,8 +42,8 @@
 
   "postStartCommand": {
     "start-dolt": ".devcontainer/start-dolt.sh",
-    "sync-knowledge": "if [ -d ~/.claude/knowledge/.git ]; then git -C ~/.claude/knowledge pull --ff-only || echo 'WARN: knowledge pull failed'; else git clone https://github.com/inconceivablelabs/knowledge.git ~/.claude/knowledge || echo 'WARN: knowledge clone failed — check gh auth (inconceivablelabs)'; fi",
-    "sync-skills": "if [ -d ~/.claude/skills/.git ]; then git -C ~/.claude/skills pull --ff-only || echo 'WARN: skills pull failed'; else git clone https://github.com/inconceivablelabs/claude-personal-skills.git ~/.claude/skills || echo 'WARN: skills clone failed — check gh auth (inconceivablelabs)'; fi"
+    "sync-knowledge": "if git -C ~/.claude/knowledge rev-parse --git-dir >/dev/null 2>&1; then git -C ~/.claude/knowledge pull --ff-only || echo 'WARN: knowledge pull failed'; elif [ -L ~/.claude/knowledge ] || [ -e ~/.claude/knowledge ]; then echo 'WARN: ~/.claude/knowledge exists but is not a usable git repo here (dangling symlink?) — skipping'; else git clone https://github.com/inconceivablelabs/knowledge.git ~/.claude/knowledge || echo 'WARN: knowledge clone failed — check gh auth (inconceivablelabs)'; fi",
+    "sync-skills": "if git -C ~/.claude/skills rev-parse --git-dir >/dev/null 2>&1; then git -C ~/.claude/skills pull --ff-only || echo 'WARN: skills pull failed'; elif [ -L ~/.claude/skills ] || [ -e ~/.claude/skills ]; then echo 'WARN: ~/.claude/skills exists but is not a usable git repo here (dangling symlink?) — skipping'; else git clone https://github.com/inconceivablelabs/claude-personal-skills.git ~/.claude/skills || echo 'WARN: skills clone failed — check gh auth (inconceivablelabs)'; fi"
   },
 
   "customizations": {
