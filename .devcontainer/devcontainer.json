@@ -37,7 +37,7 @@
     "gh-git-auth": "gh auth setup-git || true",
     "beads-claude": "bd setup claude || true",
     "install-deps": "[ -f requirements.txt ] && pip install -r requirements.txt || [ -f pyproject.toml ] && pip install -e . || true",
-    "serena-setup": "serena init && claude mcp remove serena --scope local 2>/dev/null; claude mcp add serena --scope local -- serena start-mcp-server --context ide-assistant --project \"$PWD\" || echo 'WARN: serena setup failed'"
+    "serena-setup": "serena init && claude mcp remove serena --scope local 2>/dev/null; claude mcp get serena >/dev/null 2>&1 || claude mcp add --scope user serena -- serena start-mcp-server --context=claude-code --project-from-cwd || echo 'WARN: serena setup failed'"
   },
 
   "postStartCommand": {
