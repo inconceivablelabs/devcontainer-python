@@ -110,6 +110,20 @@ RUN curl -fsSL "https://github.com/rclone/rclone/releases/download/v${RCLONE_VER
     && chmod +x /usr/local/bin/rclone \
     && rm /tmp/rclone.zip
 
+# Install Bun (JS runtime/package manager). Required by bun-based Claude Code
+# plugins whose MCP servers spawn via `bun` (e.g. the official telegram plugin,
+# .mcp.json: command "bun"). Installed to /usr/local/bin so it resolves on the
+# default PATH the `claude` process uses to spawn MCP servers — a per-user
+# ~/.bun install does NOT (see dc-h8b). Standard glibc x64 build; the -baseline
+# variant is only for CPUs without AVX2.
+ARG BUN_VERSION=1.3.14
+RUN curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" \
+    -o /tmp/bun.zip \
+    && unzip -j /tmp/bun.zip '*/bun' -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/bun \
+    && ln -s /usr/local/bin/bun /usr/local/bin/bunx \
+    && rm /tmp/bun.zip
+
 # Group-writable umask so files created in shared workspaces (e.g. /knowledge
 # bind-mounted into the assistant container as a different uid) stay writable
 # across containers. Bash tool subshells from Claude Code use `zsh -c`, which

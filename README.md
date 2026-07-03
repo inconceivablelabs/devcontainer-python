@@ -12,6 +12,7 @@ Shared development container image for Python projects with Claude Code, Node.js
 - AWS CLI v2
 - rbw (unofficial Bitwarden CLI) for secrets management
 - Common Python tools: poetry, pipx, ruff, pyright, pre-commit, pytest, httpx, pydantic
+- Bun v1.3.14 (JS runtime/package manager; required by bun-based Claude Code plugins, e.g. telegram)
 - Serena (LSP-based symbol retrieval/refactor MCP server, via pipx)
 - Development utilities: git, gh, ripgrep, fd, jq, tmux, vim
 
