@@ -21,6 +21,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         git \
         git-lfs \
         gh \
+        cron \
         curl \
         wget \
         jq \
