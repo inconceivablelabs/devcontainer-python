@@ -1,0 +1,5 @@
+# private-journal MCP local store — this repo is PUBLIC; never commit it
+.private-journal/
+
+# serena MCP local index/cache
+.serena/
