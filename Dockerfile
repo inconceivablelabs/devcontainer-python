@@ -62,7 +62,7 @@ RUN curl -fsSL "https://github.com/doy/rbw/releases/download/${RBW_VERSION}/rbw_
     && chmod +x /usr/local/bin/rbw /usr/local/bin/rbw-agent
 
 # Install Dolt (version-controlled SQL database for Beads task tracking)
-ARG DOLT_VERSION=1.82.6
+ARG DOLT_VERSION=2.3.5
 RUN curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-amd64.tar.gz" \
     | tar -xz -C /usr/local/bin/ --strip-components=2 dolt-linux-amd64/bin/dolt \
     && chmod +x /usr/local/bin/dolt
@@ -149,7 +149,7 @@ RUN npm config set prefix "/home/${USERNAME}/.npm-global"
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Install Beads in user's npm directory (pinned to prevent breaking changes)
-ARG BEADS_VERSION=1.0.3
+ARG BEADS_VERSION=1.3.0
 RUN npm install -g @beads/bd@${BEADS_VERSION}
 
 # Install beads-ui (local web UI for the bd CLI; run via `bdui-all` helper)
