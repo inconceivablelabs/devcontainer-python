@@ -75,6 +75,14 @@ RUN curl -fsSL "https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VER
     | gunzip > /usr/local/bin/duckdb \
     && chmod +x /usr/local/bin/duckdb
 
+# Install Databricks CLI (the Go binary from github.com/databricks/cli, NOT the legacy
+# PyPI databricks-cli). Auth state persists across rebuilds via core's
+# python-dev-databricks-config volume + DATABRICKS_CONFIG_FILE (added in core 1.5.0, dc-1li).
+ARG DATABRICKS_CLI_VERSION=1.18.0
+RUN curl -fsSL "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz -C /usr/local/bin/ databricks \
+    && chmod +x /usr/local/bin/databricks
+
 # Install yq (YAML processor)
 ARG YQ_VERSION=4.52.4
 RUN curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \

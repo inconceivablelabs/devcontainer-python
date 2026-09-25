@@ -11,6 +11,7 @@ Shared development container image for Python projects with Claude Code, Node.js
 - Dolt v1.82.6 (version-controlled SQL database)
 - AWS CLI v2
 - rbw (unofficial Bitwarden CLI) for secrets management
+- Databricks CLI (pinned Go binary; auth state persists via core's `python-dev-databricks-config` volume)
 - Common Python tools: poetry, pipx, ruff, pyright, pre-commit, pytest, httpx, pydantic
 - Bun v1.3.14 (JS runtime/package manager; required by bun-based Claude Code plugins, e.g. telegram)
 - Serena (LSP-based symbol retrieval/refactor MCP server, via pipx)
@@ -52,7 +53,7 @@ The reference config in `.devcontainer/devcontainer.json` includes the minimal s
 
 | Tier | Mechanism | Updates by | Examples |
 |------|-----------|------------|----------|
-| **Shared tools** | this base image | image rebuild + repull | python, node, serena, uv, git tooling, duckdb |
+| **Shared tools** | this base image | image rebuild + repull | python, node, serena, uv, git tooling, duckdb, databricks |
 | **Shared config** | the `inconceivablelabs/devcontainer-core` Feature¹ | bumping/floating the Feature ref | shared mounts, `BEADS_*` env, volume-perms fix, serena setup, knowledge/skills + Dolt wiring |
 | **Project system tools** | a devcontainer Feature (or a thin `FROM <this image>` Dockerfile for tools with no Feature) | editing the project's `devcontainer.json` | terraform (`ghcr.io/devcontainers/features/terraform:1`) |
 | **Project language deps** | `uv.lock` / `requirements.txt` via the `install-deps` hook | editing the lockfile | the repo's own Python packages |
@@ -76,6 +77,7 @@ A project's `devcontainer.json` then stays **thin and purely project-specific**:
 | Private journal | `~/.private-journal/` (bind mount) | Yes |
 | AWS credentials | `~/.aws/` (Docker volume) | Yes |
 | rbw config & vault cache | `~/.config/rbw/` (Docker volume) | Yes |
+| Databricks CLI config & OAuth token cache | `~/.databricks/` (Docker volume, via core `DATABRICKS_CONFIG_FILE`) | Yes |
 | Session history | `~/.claude/projects/` | Per project path |
 | pip cache | `~/.cache/pip/` (Docker volume) | Yes |
 
